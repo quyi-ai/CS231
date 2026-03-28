@@ -54,7 +54,10 @@ class TwoLayerNet(object):
         # and biases using the keys 'W1' and 'b1' and second layer                 #
         # weights and biases using the keys 'W2' and 'b2'.                         #
         ############################################################################
-
+        self.params['W1']= np.random.normal(loc=0.0, scale=weight_scale, size=(input_dim,hidden_dim))
+        self.params['W2']= np.random.normal(loc=0.0, scale=weight_scale, size=(hidden_dim,num_classes))
+        self.params['b1']=np.zeros(hidden_dim)
+        self.params['b2']=np.zeros(num_classes)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -83,7 +86,11 @@ class TwoLayerNet(object):
         # TODO: Implement the forward pass for the two-layer net, computing the    #
         # class scores for X and storing them in the scores variable.              #
         ############################################################################
-
+        w1,b1=self.params['W1'],self.params['b1']
+        w2,b2=self.params['W2'],self.params['b2']
+        x=X.reshape(X.shape[0],-1)
+        hiddle,hid_cache=affine_relu_forward(x,w1,b1)
+        scores,cache=affine_forward(hiddle,w2,b2)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -103,7 +110,11 @@ class TwoLayerNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
-
+        loss,dscore=softmax_loss(scores,y)
+        loss += 0.5 * self.reg * (np.sum(w1 * w1) + np.sum(w2 * w2))
+        (dhiddle,dw2,db2)=affine_backward(dscore,cache)
+        dx,dw1,db1=affine_relu_backward(dhiddle,hid_cache)
+        grads={'W1':dw1+self.reg*w1,'b1':db1,'b2':db2,'W2':dw2+self.reg*w2}
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
